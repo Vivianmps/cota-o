@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de Moeda</title>
+    <style>
+        body {
+            font-family: cursive, fantasy;
+            margin: 0;
+            padding: 20px;
+            background-color: #b9fff1;
+        }
+        h1 {
+            color: #000000;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgb(183, 190, 255);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        select, input, button {
+            width: 97%;
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px 0;
+            border: 1px solid #e00000;
+            border-radius: 1px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: rgb(255, 255, 255);
+            border: none;
+        }
+        button:hover {
+            background-color: #235326;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .cotacao {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: normal;
+            color: #000000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Conversor de Moeda</h1>
+        
+        <!-- Seletor para escolher a direção da conversão -->
+        <label for="direcao">Escolha para qual você quer converter:</label>
+        <select id="direcao">
+            <option value="usdToBrl">Dólar (USD) para Real (BRL)</option>
+            <option value="brlToUsd">Real (BRL) para Dólar (USD)</option>
+        </select>
+        
+        <label for="valor">Valor:</label>
+        <input type="number" id="valor" placeholder="Digite o valor para converter" required>
+        
+        <button onclick="converter()">Converter</button>
+        <button onclick="limpar()">Limpar</button>
+
+        <div class="result" id="resultado"></div>
+        <div class="cotacao" id="cotacao"></div>
+    </div>
+
+    <script>
+        // Função para obter e exibir a cotação do dólar ao carregar a página
+        async function obterCotacao() {
+            const url = 'https://economia.awesomeapi.com.br/last/USD-BRL';
+
+            try {
+                const resposta = await fetch(url);
+                const dados = await resposta.json();
+                const cotacao = dados.USDBRL.high;  // Cotação do USD para BRL (valor 'high' representa a cotação mais alta do dia)
+
+                // Exibindo a cotação atual
+                document.getElementById('cotacao').textContent = `Cotação atual do Dólar (USD) para Real (BRL): R$ ${cotacao}`;
+            } catch (erro) {
+                document.getElementById('cotacao').textContent = 'Erro ao obter a cotação. Tente novamente mais tarde.';
+                console.error(erro);
+            }
+        }
+
+        // Função para realizar a conversão de moeda
+        async function converter() {
+            const valor = document.getElementById('valor').value;
+            const direcao = document.getElementById('direcao').value;
+
+            if (!valor) {
+                alert('Por favor, insira um valor.');
+                return;
+            }
+
+            const url = 'https://economia.awesomeapi.com.br/last/USD-BRL';
+
+            try {
+                const resposta = await fetch(url);
+                const dados = await resposta.json();
+                const cotacao = dados.USDBRL.high;  // Cotação USD para BRL
+
+                if (direcao === 'usdToBrl') {
+                    // Dólar para Real
+                    const valorEmReal = valor * cotacao;
+                    document.getElementById('resultado').textContent = `${valor} USD é equivalente a R$ ${valorEmReal.toFixed(2)} BRL.`;
+                } else if (direcao === 'brlToUsd') {
+                    // Real para Dólar
+                    const valorEmDolar = valor / cotacao;
+                    document.getElementById('resultado').textContent = `R$ ${valor} BRL é equivalente a ${valorEmDolar.toFixed(2)} USD.`;
+                }
+            } catch (erro) {
+                document.getElementById('resultado').textContent = 'Erro ao obter a cotação. Tente novamente mais tarde.';
+                console.error(erro);
+            }
+        }
+
+        // Função para limpar os campos e o resultado
+        function limpar() {
+            // Limpar o campo de entrada
+            document.getElementById('valor').value = '';
+
+            // Limpar o campo de resultado
+            document.getElementById('resultado').textContent = '';
+
+            // Limpar o campo de cotação
+            document.getElementById('cotacao').textContent = '';
+        }
+
+        // Chama a função para obter a cotação do dólar assim que a página for carregada
+        window.onload = obterCotacao;
+    </script>
+</body>
+</html>
